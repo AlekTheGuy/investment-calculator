@@ -7,12 +7,14 @@ import { Pie } from "react-chartjs-2";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function App() {
-  const [advanced, setAdvanced] = useState(false);
+  const [advanced, setAdvanced] = useState(true);
   const [starting, setStarting] = useState(50000);
   const [monthly, setMonthly] = useState(1000);
   const [interest, setInterest] = useState(5);
   const [years, setYears] = useState(10);
   const [accumulated, setAccumulated] = useState(0);
+  const [tax, setTax] = useState(35.2);
+  const [shielded, setShielded] = useState(0.8);
 
   const updateStarting = (event: ChangeEvent<HTMLInputElement>) => {
     setStarting(Number(event.target.value));
@@ -28,6 +30,14 @@ function App() {
 
   const updateYears = (event: ChangeEvent<HTMLInputElement>) => {
     setYears(Number(event.target.value));
+  };
+
+  const updateTax = (event: ChangeEvent<HTMLInputElement>) => {
+    setTax(Number(event.target.value));
+  };
+
+  const updateShielded = (event: ChangeEvent<HTMLInputElement>) => {
+    setShielded(Number(event.target.value));
   };
 
   const updateAdvanced = (event: ChangeEvent<HTMLInputElement>) => {
@@ -162,9 +172,49 @@ function App() {
     if (advanced) {
       return (
         <Grid item>
-          <Grid container direction={"column"}>
-            <h1>Norwegian tax settings</h1>
-            <Grid item></Grid>
+          <Grid container direction={"column"} spacing={2}>
+            <h1>Taxes</h1>
+            <Grid item>
+              <Grid
+                container
+                spacing={2}
+                direction={"row"}
+                justifyContent={"center"}
+              >
+                <Grid item>
+                  <TextField
+                    className="inputField"
+                    type={"number"}
+                    onChange={updateTax}
+                    id="tax"
+                    label="Tax on profits"
+                    variant="outlined"
+                    defaultValue={35.2}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">%</InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item>
+                  <TextField
+                    className="inputField"
+                    type={"number"}
+                    onChange={updateShielded}
+                    id="shielded"
+                    label="Shielded yearly"
+                    variant="outlined"
+                    defaultValue={0.8}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">%</InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       );
@@ -190,7 +240,7 @@ function App() {
           alignItems={"center"}
           spacing={1}
         >
-          <Grid item>simple</Grid>
+          <Grid item>basic</Grid>
           <Grid item>
             <Switch
               checked={advanced} // relevant state for your case
