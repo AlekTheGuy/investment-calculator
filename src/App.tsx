@@ -1,12 +1,13 @@
 import "./App.css";
-import { Grid, TextField, InputAdornment, Card, duration } from "@mui/material";
-import { ChangeEvent, SetStateAction, useEffect, useState } from "react";
+import { Grid, TextField, InputAdornment, Switch } from "@mui/material";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function App() {
+  const [advanced, setAdvanced] = useState(false);
   const [starting, setStarting] = useState(50000);
   const [monthly, setMonthly] = useState(1000);
   const [interest, setInterest] = useState(5);
@@ -27,6 +28,10 @@ function App() {
 
   const updateYears = (event: ChangeEvent<HTMLInputElement>) => {
     setYears(Number(event.target.value));
+  };
+
+  const updateAdvanced = (event: ChangeEvent<HTMLInputElement>) => {
+    setAdvanced(Boolean(event.target.checked));
   };
 
   const data = {
@@ -64,9 +69,80 @@ function App() {
     setAccumulated(Math.round(totalSum));
   });
 
+  const simpleInput = () => {
+    return (
+      <Grid item>
+        <Grid container spacing={2} direction={"row"} justifyContent={"center"}>
+          <Grid item>
+            <TextField
+              className="inputField"
+              type={"number"}
+              onChange={updateStarting}
+              id="starting"
+              label="Starting amount"
+              variant="outlined"
+              defaultValue={50000}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">kr</InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              className="inputField"
+              type={"number"}
+              onChange={updateMonthly}
+              id="recurring"
+              label="Monthly investment"
+              variant="outlined"
+              defaultValue={1000}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">kr</InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              className="inputField"
+              type={"number"}
+              onChange={updateInterest}
+              id="monthly-interest"
+              label="Yearly interest"
+              variant="outlined"
+              defaultValue={5}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">%</InputAdornment>,
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              className="inputField"
+              type={"number"}
+              onChange={updateYears}
+              id="years"
+              label="Amount of years"
+              variant="outlined"
+              defaultValue={10}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">years</InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+        </Grid>
+      </Grid>
+    );
+  };
+
   const Results = () => {
     return (
-      <>
+      <Grid item>
         <Grid container direction={"column"}>
           <Grid item>
             <h2>
@@ -78,8 +154,21 @@ function App() {
             <Pie data={data} options={options} />
           </Grid>
         </Grid>
-      </>
+      </Grid>
     );
+  };
+
+  const advancedInput = () => {
+    if (advanced) {
+      return (
+        <Grid item>
+          <Grid container direction={"column"}>
+            <h1>Norwegian tax settings</h1>
+            <Grid item></Grid>
+          </Grid>
+        </Grid>
+      );
+    }
   };
 
   return (
@@ -89,86 +178,30 @@ function App() {
         direction={"column"}
         alignItems={"center"}
         textAlign={"center"}
+        spacing={2}
       >
         <Grid item>
           <h1>Investment calculator</h1>
         </Grid>
-        <Grid item>
-          <Grid
-            container
-            spacing={2}
-            direction={"row"}
-            justifyContent={"center"}
-          >
-            <Grid item>
-              <TextField
-                className="inputField"
-                type={"number"}
-                onChange={updateStarting}
-                id="starting"
-                label="Starting amount"
-                variant="outlined"
-                defaultValue={50000}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">kr</InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item>
-              <TextField
-                className="inputField"
-                type={"number"}
-                onChange={updateMonthly}
-                id="recurring"
-                label="Monthly investment"
-                variant="outlined"
-                defaultValue={1000}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">kr</InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item>
-              <TextField
-                className="inputField"
-                type={"number"}
-                onChange={updateInterest}
-                id="monthly-interest"
-                label="Yearly interest"
-                variant="outlined"
-                defaultValue={5}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">%</InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item>
-              <TextField
-                className="inputField"
-                type={"number"}
-                onChange={updateYears}
-                id="years"
-                label="Amount of years"
-                variant="outlined"
-                defaultValue={10}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">years</InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
+        <Grid
+          component="label"
+          container
+          justifyContent={"center"}
+          alignItems={"center"}
+          spacing={1}
+        >
+          <Grid item>simple</Grid>
+          <Grid item>
+            <Switch
+              checked={advanced} // relevant state for your case
+              onChange={updateAdvanced} // relevant method to handle your change
+            />
           </Grid>
+          <Grid item>advanced</Grid>
         </Grid>
-        <Grid item>
-          <Results />
-        </Grid>
+        {simpleInput()}
+        {advancedInput()}
+        {Results()}
       </Grid>
     </>
   );
