@@ -7,14 +7,17 @@ import { Pie } from "react-chartjs-2";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function App() {
-  const [advanced, setAdvanced] = useState(true);
+  const [advanced, setAdvanced] = useState(false);
   const [starting, setStarting] = useState(50000);
   const [monthly, setMonthly] = useState(1000);
   const [interest, setInterest] = useState(5);
   const [years, setYears] = useState(10);
   const [accumulated, setAccumulated] = useState(0);
-  const [tax, setTax] = useState(35.2);
-  const [shielded, setShielded] = useState(0.8);
+  const [capitalGainsTax, setCapitalGainsTax] = useState(35.2);
+  const [totalTaxes, setTotalTaxes] = useState(0);
+  const [totalInvested, setTotalInvested] = useState(0);
+  const [shieldedYearly, setShieldedYearly] = useState(0.8);
+  const [totalShielded, setTotalShielded] = useState(0);
 
   const updateStarting = (event: ChangeEvent<HTMLInputElement>) => {
     setStarting(Number(event.target.value));
@@ -32,12 +35,12 @@ function App() {
     setYears(Number(event.target.value));
   };
 
-  const updateTax = (event: ChangeEvent<HTMLInputElement>) => {
-    setTax(Number(event.target.value));
+  const updateCapitalGainsTax = (event: ChangeEvent<HTMLInputElement>) => {
+    setCapitalGainsTax(Number(event.target.value));
   };
 
-  const updateShielded = (event: ChangeEvent<HTMLInputElement>) => {
-    setShielded(Number(event.target.value));
+  const updateShieldedYearly = (event: ChangeEvent<HTMLInputElement>) => {
+    setShieldedYearly(Number(event.target.value));
   };
 
   const updateAdvanced = (event: ChangeEvent<HTMLInputElement>) => {
@@ -71,12 +74,35 @@ function App() {
   };
 
   useEffect(() => {
-    let totalSum = starting;
-    for (let i = 1; i <= years * 12; i++) {
-      totalSum += monthly;
-      totalSum *= 1 + interest / 100 / 12;
+    if (!advanced) {
+      let totalSum = starting;
+      for (let i = 1; i <= years * 12; i++) {
+        totalSum += monthly;
+        totalSum *= 1 + interest / 100 / 12;
+      }
+      setAccumulated(Math.round(totalSum));
+    } else {
+      let totalSum = starting;
+      let totalInvested = starting;
+      let totalShielded = 0;
+      for (let i = 1; i <= years * 12; i++) {
+        totalSum += monthly;
+        totalSum *= 1 + interest / 100 / 12;
+        totalInvested += monthly;
+        if (i % 12 == 0) {
+          totalShielded += (totalSum * shieldedYearly) / 100;
+        }
+      }
+      setTotalShielded(Math.round(totalShielded));
+      setTotalInvested(totalInvested);
+      setAccumulated(Math.round(totalSum));
+      setTotalTaxes(
+        Math.round(
+          ((accumulated - totalInvested + totalShielded) * capitalGainsTax) /
+            100
+        )
+      );
     }
-    setAccumulated(Math.round(totalSum));
   });
 
   const simpleInput = () => {
@@ -90,7 +116,7 @@ function App() {
               onChange={updateStarting}
               id="starting"
               label="Starting amount"
-              variant="outlined"
+              variant="filled"
               defaultValue={50000}
               InputProps={{
                 endAdornment: (
@@ -106,7 +132,7 @@ function App() {
               onChange={updateMonthly}
               id="recurring"
               label="Monthly investment"
-              variant="outlined"
+              variant="filled"
               defaultValue={1000}
               InputProps={{
                 endAdornment: (
@@ -122,7 +148,7 @@ function App() {
               onChange={updateInterest}
               id="monthly-interest"
               label="Yearly interest"
-              variant="outlined"
+              variant="filled"
               defaultValue={5}
               InputProps={{
                 endAdornment: <InputAdornment position="end">%</InputAdornment>,
@@ -136,7 +162,7 @@ function App() {
               onChange={updateYears}
               id="years"
               label="Amount of years"
-              variant="outlined"
+              variant="filled"
               defaultValue={10}
               InputProps={{
                 endAdornment: (
@@ -151,21 +177,60 @@ function App() {
   };
 
   const Results = () => {
-    return (
-      <Grid item>
-        <Grid container direction={"column"}>
-          <Grid item>
-            <h2>
-              Total sum:{" "}
-              {accumulated.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}kr
-            </h2>
-          </Grid>
-          <Grid item width={300}>
-            <Pie data={data} options={options} />
+    if (!advanced) {
+      return (
+        <Grid item>
+          <Grid container direction={"column"}>
+            <Grid item>
+              <h1>
+                Final sum:{" "}
+                {accumulated.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}kr
+              </h1>
+            </Grid>
+            <Grid item width={300}>
+              <Pie data={data} options={options} />
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
-    );
+      );
+    } else {
+      return (
+        <Grid item>
+          <Grid container direction={"column"}>
+            <Grid item textAlign={"center"}>
+              <h1>
+                Total payout:{" "}
+                {(accumulated - totalTaxes)
+                  .toString()
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, " ")}{" "}
+                kr
+              </h1>
+              <h2>
+                Final sum:{" "}
+                {accumulated.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}kr
+              </h2>
+              <h2>
+                Invested:{" "}
+                {totalInvested.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
+                kr
+              </h2>
+              <h2>
+                shielded:{" "}
+                {totalShielded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
+                kr
+              </h2>
+              <h2>
+                taxes:{" "}
+                {totalTaxes.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}kr
+              </h2>
+            </Grid>
+            <Grid item width={300}>
+              <Pie data={data} options={options} />
+            </Grid>
+          </Grid>
+        </Grid>
+      );
+    }
   };
 
   const advancedInput = () => {
@@ -185,9 +250,9 @@ function App() {
                   <TextField
                     className="inputField"
                     type={"number"}
-                    onChange={updateTax}
+                    onChange={updateCapitalGainsTax}
                     id="tax"
-                    label="Tax on profits"
+                    label="Capital gains tax"
                     variant="outlined"
                     defaultValue={35.2}
                     InputProps={{
@@ -201,7 +266,7 @@ function App() {
                   <TextField
                     className="inputField"
                     type={"number"}
-                    onChange={updateShielded}
+                    onChange={updateShieldedYearly}
                     id="shielded"
                     label="Shielded yearly"
                     variant="outlined"
@@ -227,28 +292,10 @@ function App() {
         container
         direction={"column"}
         alignItems={"center"}
-        textAlign={"center"}
-        spacing={2}
+        justifyContent={"center"}
+        spacing={3}
+        padding={5}
       >
-        <Grid item>
-          <h1>Investment calculator</h1>
-        </Grid>
-        <Grid
-          component="label"
-          container
-          justifyContent={"center"}
-          alignItems={"center"}
-          spacing={1}
-        >
-          <Grid item>basic</Grid>
-          <Grid item>
-            <Switch
-              checked={advanced} // relevant state for your case
-              onChange={updateAdvanced} // relevant method to handle your change
-            />
-          </Grid>
-          <Grid item>advanced</Grid>
-        </Grid>
         {simpleInput()}
         {advancedInput()}
         {Results()}
