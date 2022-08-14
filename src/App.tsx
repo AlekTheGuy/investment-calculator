@@ -1,5 +1,11 @@
 import "./App.css";
-import { Grid, TextField, InputAdornment, Switch } from "@mui/material";
+import {
+  Grid,
+  TextField,
+  InputAdornment,
+  Switch,
+  Checkbox,
+} from "@mui/material";
 import { ChangeEvent, useEffect, useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
@@ -196,33 +202,33 @@ function App() {
     } else {
       return (
         <Grid item>
-          <Grid container direction={"column"}>
+          <Grid container direction={"column"} alignItems={"center"}>
             <Grid item textAlign={"center"}>
               <h1>
-                Total payout:{" "}
+                Payout after tax:{" "}
                 {(accumulated - totalTaxes)
                   .toString()
                   .replace(/\B(?=(\d{3})+(?!\d))/g, " ")}{" "}
                 kr
               </h1>
-              <h2>
-                Final sum:{" "}
+              <h3>
+                Payout before tax:{" "}
                 {accumulated.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}kr
-              </h2>
-              <h2>
+              </h3>
+              <h3>
+                total taxes:{" "}
+                {totalTaxes.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}kr
+              </h3>
+              <h3>
                 Invested:{" "}
                 {totalInvested.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
                 kr
-              </h2>
-              <h2>
+              </h3>
+              <h3>
                 shielded:{" "}
                 {totalShielded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
                 kr
-              </h2>
-              <h2>
-                taxes:{" "}
-                {totalTaxes.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")}kr
-              </h2>
+              </h3>
             </Grid>
             <Grid item width={300}>
               <Pie data={data} options={options} />
@@ -237,8 +243,7 @@ function App() {
     if (advanced) {
       return (
         <Grid item>
-          <Grid container direction={"column"} spacing={2}>
-            <h1>Taxes</h1>
+          <Grid container direction={"column"}>
             <Grid item>
               <Grid
                 container
@@ -253,7 +258,7 @@ function App() {
                     onChange={updateCapitalGainsTax}
                     id="tax"
                     label="Capital gains tax"
-                    variant="outlined"
+                    variant="filled"
                     defaultValue={35.2}
                     InputProps={{
                       endAdornment: (
@@ -269,7 +274,7 @@ function App() {
                     onChange={updateShieldedYearly}
                     id="shielded"
                     label="Shielded yearly"
-                    variant="outlined"
+                    variant="filled"
                     defaultValue={0.8}
                     InputProps={{
                       endAdornment: (
@@ -293,10 +298,15 @@ function App() {
         direction={"column"}
         alignItems={"center"}
         justifyContent={"center"}
+        textAlign={"center"}
         spacing={3}
-        padding={5}
+        paddingTop={5}
       >
+        <h1>Investment calculator</h1>
         {simpleInput()}
+        <h2>
+          Taxes <Checkbox checked={advanced} onChange={updateAdvanced} />
+        </h2>
         {advancedInput()}
         {Results()}
       </Grid>
