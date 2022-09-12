@@ -6,9 +6,9 @@ import {
 } from "@mui/material";
 import { ChangeEvent, useEffect, useState } from "react";
 import {
-  Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title,
+  Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, Ticks,
 } from "chart.js";
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar, Chart, Pie } from "react-chartjs-2";
 
 ChartJS.register(
   ArcElement,
@@ -26,6 +26,7 @@ function App() {
   const [interest, setInterest] = useState(5);
   const [years, setYears] = useState(10);
   const [accumulated, setAccumulated] = useState(0);
+  const [invested, setInvested] = useState<number[]>([monthly]);
 
   const updateStarting = (event: ChangeEvent<HTMLInputElement>) => {
     setStarting(Number(event.target.value));
@@ -63,22 +64,17 @@ function App() {
     ],
   };
 
-  const labels = ["cool", "cool2", "cool3"];
+  const labels = ["cool", "cool2", "cool3", "cool4", "cool5"];
   const barChartData = {
     labels: labels,
     datasets: [
       {
-        label: 'Dataset 1',
-        data: [1, 2, 3],
-        backgroundColor: "rgb(255, 99, 132)",
+        label: 'Invested',
+        data: invested,
+        backgroundColor: "rgb(54, 162, 0)",
       },
       {
-        label: 'Dataset 2',
-        data: [3, 2, 1],
-        backgroundColor: "rgb(54, 162, 235)",
-      },
-      {
-        label: 'Dataset 3',
+        label: 'Starting',
         data: [3, 1, 3],
         backgroundColor: "rgb(255, 205, 86)",
       },
@@ -86,12 +82,18 @@ function App() {
   };
 
   const barOptions = {
+    responsive: true,
+    Animation: {
+      duration: 0,
+    },
     scales: {
       x: {
         stacked: true,
       },
       y: {
-        stacked: true
+        stacked: true,
+        min: 0,
+        max: 1000
       }
     }
   }
@@ -104,9 +106,11 @@ function App() {
 
   useEffect(() => {
     let totalSum = starting;
+    let investedArray = [];
     for (let i = 1; i <= years * 12; i++) {
       totalSum += monthly;
       totalSum *= 1 + interest / 100 / 12;
+      investedArray.push(monthly * (i + 1))
     }
     setAccumulated(Math.round(totalSum));
   });
@@ -194,7 +198,6 @@ function App() {
           </Grid>
           <Grid item width={300}>
             <Pie data={pieData} options={pieOptions} />
-            <Bar data={barChartData} options={barOptions} />
           </Grid>
         </Grid>
       </Grid>
